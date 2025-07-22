@@ -39,6 +39,11 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 	case "w":
 		return nextWeek(date, parts)
+
+	case "m":
+		return nextMonth(date, parts)
+	default:
+		return "", fmt.Errorf("wrong repeat date format: %s", parts[0])
 	}
 
 }
@@ -116,6 +121,34 @@ func nextWeek(date time.Time, parts []string) (string, error) {
 	return "", errors.New("date not found within max search period")
 }
 
+func nextMonth(date time.Time, parts []string) (string, error) {
+	if len(parts) < 2 {
+		return "", errors.New("wrong rule for 'm' format")
+	}
+
+	days, months, err := parseMonthRule(parts[1:])
+	if err != nil {
+		return "", fmt.Errorf("invalid month rule: %w", err)
+	}
+
+	newDate := date
+
+	//Проверка удовлетворяет ли стартовая дата условию "позже чем сейчас"
+	if afterNow(newDate) && correctMonthDay(newDate, days, months) {
+		return newDate.Format(layout), nil
+	}
+
+	//Перебор дней
+	for i := 0; i < 400; i++ {
+		newDate = newDate.AddDate(0, 0, 1)
+		if afterNow(newDate) && correctMonthDay(newDate, days, months) {
+			return newDate.Format(layout), nil
+		}
+	}
+
+	return "", errors.New("date not found within max search period")
+}
+
 func parseIntList(s string, min, max int) ([]int, error) {
 	parts := strings.Split(s, ",")
 	result := make([]int, 0, len(parts))
@@ -148,6 +181,72 @@ func correctWeekDay(date time.Time, days []int) bool {
 	}
 	for _, d := range days {
 		if d == wdayInt {
+			return true
+		}
+	}
+	return false
+}
+
+func parseMonthRule(parts []string) (days []int, months []int, err error) {
+	if len(parts) == 0 {
+		return nil, nil, errors.New("missing days part")
+	}
+
+	// Парсинг дней (-2..31)
+	days, err = parseIntList(parts[1], -2, 31)
+	if err != nil {
+		return nil, nil, fmt.Errorf("invalid days: %w", err)
+	}
+
+	// Парсинг месяцев
+	if len(parts) > 1 {
+		months, err = parseIntList(parts[2], 1, 12)
+		if err != nil {
+			return nil, nil, fmt.Errorf("invalid months: %w", err)
+		}
+	}
+
+	return days, months, nil
+}
+
+func correctMonthDay(date time.Time, days, months []int) bool {
+	// Проверка месяца
+	if len(months) > 0 {
+		monthMatch := false
+		currMonth := int(date.Month())
+		for _, m := range months {
+			if m == currMonth {
+				monthMatch = true
+				break
+			}
+		}
+		if !monthMatch {
+			return false
+		}
+	}
+
+	// Вычисление последнего дня месяца
+	lastDay := time.Date(date.Year(), date.Month()+1, 0, 0, 0, 0, 0, time.UTC).Day()
+	currDay := date.Day()
+
+	// Проверка дней
+	for _, d := range days {
+		var targetDay int
+		switch d {
+		case -1: // Последний день месяца
+			targetDay = lastDay
+		case -2: // Предпоследний день месяца
+			targetDay = lastDay - 1
+		default:
+			targetDay = d
+		}
+
+		// Пропустить несуществующие дни
+		if targetDay > lastDay {
+			continue
+		}
+
+		if currDay == targetDay {
 			return true
 		}
 	}
