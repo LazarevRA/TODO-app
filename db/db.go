@@ -10,17 +10,8 @@ import (
 
 const (
 	// SQL-схема для создания таблицы
-	schema = `
-CREATE TABLE scheduler (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date CHAR(8) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    comment TEXT NOT NULL,
-    repeat VARCHAR(128) NOT NULL
-);
+	schema = "CREATE TABLE scheduler (\nid INTEGER PRIMARY KEY AUTOINCREMENT,\ndate CHAR(8) NOT NULL DEFAULT '',\ntitle VARCHAR(255) NOT NULL DEFAULT '',\ncomment TEXT NOT NULL DEFAULT '',\nrepeat VARCHAR(128) NOT NULL DEFAULT ''\n);"
 
-CREATE INDEX id_date ON scheduler(date);
-`
 	//Имя БД
 	Name = "scheduler.db"
 )
@@ -48,6 +39,11 @@ func Init(dbFile string) error {
 			return fmt.Errorf("can't create DB: %w", err)
 		}
 		fmt.Println("DB created")
+
+		if _, err = DB.Exec("CREATE INDEX idx_date ON scheduler(date);"); err != nil {
+			return fmt.Errorf("can't create index on date: %w", err)
+		}
+		fmt.Println("date index created")
 	}
 
 	return nil
