@@ -1,13 +1,22 @@
 package main
 
 import (
+	"Final_project/db"
 	"Final_project/tests"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	_ "modernc.org/sqlite"
 )
 
 func main() {
+
+	if err := db.Init(db.Name); err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.DB.Close()
 
 	//Директория для возвращаемых файлов
 	webDir := "./web"
@@ -20,9 +29,9 @@ func main() {
 	http.Handle("/", fileServer)
 
 	// Запуск сервера
-	fmt.Printf("Сервер запущен на порту %s\n", port)
+	fmt.Printf("server started at port: %s\n", port)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
-		fmt.Printf("Ошибка запуска сервера: %v\n", err)
+		fmt.Printf("server start error: %v\n", err)
 	}
 }
