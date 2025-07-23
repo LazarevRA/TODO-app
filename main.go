@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Final_project/api"
 	"Final_project/db"
 	"Final_project/tests"
 	"fmt"
@@ -17,6 +18,8 @@ func main() {
 		return
 	}
 	defer db.DB.Close()
+
+	api.Init()
 
 	//Директория для возвращаемых файлов
 	webDir := "./web"

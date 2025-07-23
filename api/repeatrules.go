@@ -1,4 +1,4 @@
-package nextdate
+package api
 
 import (
 	"errors"
