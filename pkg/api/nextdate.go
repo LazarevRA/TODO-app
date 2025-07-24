@@ -26,6 +26,9 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		return "", errors.New("repeat rule is empty")
 	}
 
+	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+
 	parts := strings.Split(repeat, " ")
 
 	switch parts[0] {
@@ -58,8 +61,6 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 	if nowStr == "" {
 		now = time.Now()
 
-		//Для тестов
-		//now = time.Date(2024, time.January, 26, 0, 0, 0, 0, time.UTC)
 	} else {
 		var err error
 		now, err = time.Parse(Layout, nowStr)

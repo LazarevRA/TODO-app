@@ -99,7 +99,7 @@ func nextMonth(date time.Time, parts []string) (string, error) {
 	}
 
 	//Перебор дней
-	for i := 0; i < 3000; i++ {
+	for i := 0; i < 10000; i++ {
 		newDate = newDate.AddDate(0, 0, 1)
 		if afterNow(newDate) && correctMonthDay(newDate, days, months) {
 			return newDate.Format(Layout), nil
