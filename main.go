@@ -1,40 +1,32 @@
 package main
 
 import (
-	"Final_project/api"
-	"Final_project/db"
-	"Final_project/tests"
+	"Final_project/pkg/db"
+	"Final_project/pkg/server"
 	"fmt"
-	"net/http"
-	"strconv"
+	"log"
+	"os"
 
 	_ "modernc.org/sqlite"
 )
 
 func main() {
 
+	// Подключение к БД
 	if err := db.Init(db.Name); err != nil {
 		fmt.Println(err)
 		return
 	}
+	//Не забываем закрыть БД
 	defer db.DB.Close()
 
-	api.Init()
+	//Новый логгер и сервер
+	logger := log.New(os.Stdout, "INFO: ", log.LstdFlags)
+	srv := server.NewServer(logger)
 
-	//Директория для возвращаемых файлов
-	webDir := "./web"
-
-	//Порт из переменной пакета tests
-	port := strconv.Itoa(tests.Port)
-
-	// Настройка хэндлера
-	fileServer := http.FileServer(http.Dir(webDir))
-	http.Handle("/", fileServer)
-
-	// Запуск сервера
-	fmt.Printf("server started at port: %s\n", port)
-	err := http.ListenAndServe(":"+port, nil)
-	if err != nil {
-		fmt.Printf("server start error: %v\n", err)
+	//Запуск сервера, api.Init встроен в server.Start
+	if err := srv.Start(); err != nil {
+		logger.Fatal("Error starting server: ", err)
 	}
+
 }

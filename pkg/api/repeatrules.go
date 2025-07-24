@@ -26,7 +26,7 @@ func nextDay(date time.Time, parts []string) (string, error) {
 	nextDate := date
 	//Увеличиваем время, пока не будет больше текущего
 	for {
-		nextDate.AddDate(0, 0, interval)
+		nextDate = nextDate.AddDate(0, 0, interval)
 		if afterNow(nextDate) {
 			return nextDate.Format(Layout), nil
 		}
@@ -42,7 +42,7 @@ func nextYear(date time.Time, parts []string) (string, error) {
 	nextDate := date
 
 	for {
-		nextDate.AddDate(1, 0, 0)
+		nextDate = nextDate.AddDate(1, 0, 0)
 		if afterNow(nextDate) {
 			return nextDate.Format(Layout), nil
 		}

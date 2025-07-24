@@ -48,6 +48,11 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
 	dateStr := r.FormValue("date")
 	repeat := r.FormValue("repeat")
 	nowStr := r.FormValue("now")
