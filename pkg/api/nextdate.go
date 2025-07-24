@@ -10,10 +10,7 @@ import (
 
 func afterNow(date time.Time) bool {
 
-	//Для тестов
-	timeNow := time.Date(2024, time.January, 26, 0, 0, 0, 0, time.UTC)
-
-	return timeNow.Before(date)
+	return date.After(time.Now())
 }
 
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
@@ -59,9 +56,10 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 	var now time.Time
 
 	if nowStr == "" {
-		//now = time.Now()
-		//для тестов
-		now = time.Date(2024, time.January, 26, 0, 0, 0, 0, time.UTC)
+		now = time.Now()
+
+		//Для тестов
+		//now = time.Date(2024, time.January, 26, 0, 0, 0, 0, time.UTC)
 	} else {
 		var err error
 		now, err = time.Parse(Layout, nowStr)
