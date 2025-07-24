@@ -86,7 +86,7 @@ func nextMonth(date time.Time, parts []string) (string, error) {
 		return "", errors.New("wrong rule for 'm' format")
 	}
 
-	days, months, err := parseMonthRule(parts[1:])
+	days, months, err := parseMonthRule(parts)
 	if err != nil {
 		return "", fmt.Errorf("invalid month rule: %w", err)
 	}
@@ -99,7 +99,7 @@ func nextMonth(date time.Time, parts []string) (string, error) {
 	}
 
 	//Перебор дней
-	for i := 0; i < 400; i++ {
+	for i := 0; i < 3000; i++ {
 		newDate = newDate.AddDate(0, 0, 1)
 		if afterNow(newDate) && correctMonthDay(newDate, days, months) {
 			return newDate.Format(Layout), nil
@@ -148,9 +148,6 @@ func correctWeekDay(date time.Time, days []int) bool {
 }
 
 func parseMonthRule(parts []string) (days []int, months []int, err error) {
-	if len(parts) == 0 {
-		return nil, nil, errors.New("missing days part")
-	}
 
 	// Парсинг дней (-2..31)
 	days, err = parseIntList(parts[1], -2, 31)
@@ -159,7 +156,7 @@ func parseMonthRule(parts []string) (days []int, months []int, err error) {
 	}
 
 	// Парсинг месяцев
-	if len(parts) > 1 {
+	if len(parts) > 2 {
 		months, err = parseIntList(parts[2], 1, 12)
 		if err != nil {
 			return nil, nil, fmt.Errorf("invalid months: %w", err)
@@ -170,6 +167,38 @@ func parseMonthRule(parts []string) (days []int, months []int, err error) {
 }
 
 func correctMonthDay(date time.Time, days, months []int) bool {
+
+	if len(months) > 0 {
+		found := false
+		for _, m := range months {
+			if m == int(date.Month()) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	// Проверка дня
+	lastDay := time.Date(date.Year(), date.Month()+1, 0, 0, 0, 0, 0, time.UTC).Day()
+	currentDay := date.Day()
+
+	for _, d := range days {
+		switch {
+		case d > 0 && currentDay == d:
+			return true
+		case d == -1 && currentDay == lastDay:
+			return true
+		case d == -2 && currentDay == lastDay-1:
+			return true
+		}
+	}
+	return false
+}
+
+/*
 	// Проверка месяца
 	if len(months) > 0 {
 		monthMatch := false
@@ -211,4 +240,5 @@ func correctMonthDay(date time.Time, days, months []int) bool {
 		}
 	}
 	return false
-}
+		}
+*/

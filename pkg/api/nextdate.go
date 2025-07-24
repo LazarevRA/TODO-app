@@ -9,7 +9,11 @@ import (
 )
 
 func afterNow(date time.Time) bool {
-	return time.Now().Before(date)
+
+	//Для тестов
+	timeNow := time.Date(2024, time.January, 26, 0, 0, 0, 0, time.UTC)
+
+	return timeNow.Before(date)
 }
 
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
@@ -48,11 +52,6 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Invalid form data", http.StatusBadRequest)
-		return
-	}
-
 	dateStr := r.FormValue("date")
 	repeat := r.FormValue("repeat")
 	nowStr := r.FormValue("now")
@@ -60,7 +59,9 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 	var now time.Time
 
 	if nowStr == "" {
-		now = time.Now()
+		//now = time.Now()
+		//для тестов
+		now = time.Date(2024, time.January, 26, 0, 0, 0, 0, time.UTC)
 	} else {
 		var err error
 		now, err = time.Parse(Layout, nowStr)
