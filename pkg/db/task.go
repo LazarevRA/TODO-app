@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"errors"
 )
 
@@ -12,31 +13,23 @@ type Task struct {
 	Repeat  string `json:"repeat"`
 }
 
+// ok
 func AddTask(task *Task) (int64, error) {
 
 	if DB == nil {
 		return 0, errors.New("database not initialized")
 	}
 
-	/* query := `
+	query := `
 	    INSERT INTO scheduler (date, title, comment, repeat)
 	    VALUES (:date, :title, :comment, :repeat)
 	    `
-		res, err := DB.Exec(query,
-			sql.Named("date", task.Date),
-			sql.Named("title", task.Title),
-			sql.Named("comment", task.Comment),
-			sql.Named("repeat", task.Repeat),
-		)*/
-
-	query := `
-	INSERT INTO scheduler (date, title, comment, repeat)
-	VALUES (?, ?, ?, ?)
-	`
-	res, err := DB.Exec(query, task.Date, task.Title, task.Comment, task.Repeat)
-	if err != nil {
-		return 0, err
-	}
+	res, err := DB.Exec(query,
+		sql.Named("date", task.Date),
+		sql.Named("title", task.Title),
+		sql.Named("comment", task.Comment),
+		sql.Named("repeat", task.Repeat),
+	)
 
 	if err != nil {
 		return 0, err

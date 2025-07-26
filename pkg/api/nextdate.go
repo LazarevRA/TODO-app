@@ -8,11 +8,30 @@ import (
 	"time"
 )
 
-func afterNow(now, date time.Time) bool {
+func afterNow(date, now time.Time) bool {
 
+	now = now.Truncate(24 * time.Hour)
+	date = date.Truncate(24 * time.Hour)
 	return date.After(now)
+
 }
 
+// ok
+/*
+func afterNow(date, now time.Time) bool {
+	dy, dm, dd := date.Date()
+	ny, nm, nd := now.Date()
+
+	if dy != ny {
+		return dy > ny
+	}
+	if dm != nm {
+		return dm > nm
+	}
+	return dd > nd
+}*/
+
+// OK
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 	//Получаем дату
@@ -48,7 +67,8 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 }
 
-func NextDateHandler(w http.ResponseWriter, r *http.Request) {
+// OK
+func nextDateHandler(w http.ResponseWriter, r *http.Request) {
 
 	dateStr := r.FormValue("date")
 	repeat := r.FormValue("repeat")
@@ -57,7 +77,8 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 	var now time.Time
 
 	if nowStr == "" {
-		now = time.Now()
+
+		now = time.Now().Truncate(24 * time.Hour)
 
 	} else {
 		var err error
@@ -66,6 +87,7 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "incorrect parameter 'now'", http.StatusBadRequest)
 			return
 		}
+		now = now.Truncate(24 * time.Hour)
 	}
 	nextDate, err := NextDate(now, dateStr, repeat)
 

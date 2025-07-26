@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// ok
 func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	var task db.Task
@@ -50,21 +51,24 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// OK
 func writeJSON(w http.ResponseWriter, key string, value any) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	json.NewEncoder(w).Encode(map[string]any{key: value})
 }
 
+// OK
 func checkDate(task *db.Task) error {
 
 	now := time.Now()
+	now = now.Truncate(24 * time.Hour)
 
 	// Если дата не указана, устанавливаем сегодняшнюю
 	if task.Date == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(Layout)
 	}
 	// парсим дату
-	date, err := time.Parse("20060102", task.Date)
+	date, err := time.Parse(Layout, task.Date)
 	if err != nil {
 		return err
 	}
@@ -82,7 +86,7 @@ func checkDate(task *db.Task) error {
 	// Проверка, что дата больше чем сейчас
 	if afterNow(now, date) {
 		if task.Repeat == "" {
-			task.Date = now.Format("20060102")
+			task.Date = now.Format(Layout)
 		} else {
 			task.Date = next
 		}

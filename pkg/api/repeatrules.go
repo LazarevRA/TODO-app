@@ -26,7 +26,7 @@ func nextDay(now, date time.Time, parts []string) (string, error) {
 	//Увеличиваем время, пока не будет больше текущего
 	for {
 		date = date.AddDate(0, 0, interval)
-		if afterNow(now, date) {
+		if afterNow(date, now) {
 			return date.Format(Layout), nil
 		}
 	}
@@ -40,7 +40,7 @@ func nextYear(now, date time.Time, parts []string) (string, error) {
 
 	for {
 		date = date.AddDate(1, 0, 0)
-		if afterNow(now, date) {
+		if afterNow(date, now) {
 			return date.Format(Layout), nil
 		}
 	}
@@ -61,14 +61,14 @@ func nextWeek(now, date time.Time, parts []string) (string, error) {
 	}
 
 	//Проверка удовлетворяет ли стартовая дата условию "позже чем сейчас"
-	if afterNow(now, date) && correctWeekDay(date, days) {
+	if afterNow(date, now) && correctWeekDay(date, days) {
 		return date.Format(Layout), nil
 	}
 
 	//Перебор дней
-	for i := 0; i < 400; i++ {
+	for i := 0; i < 10000; i++ {
 		date = date.AddDate(0, 0, 1)
-		if afterNow(now, date) && correctWeekDay(date, days) {
+		if afterNow(date, now) && correctWeekDay(date, days) {
 			return date.Format(Layout), nil
 		}
 	}
@@ -89,14 +89,14 @@ func nextMonth(now, date time.Time, parts []string) (string, error) {
 	newDate := date
 
 	//Проверка удовлетворяет ли стартовая дата условию "позже чем сейчас"
-	if afterNow(now, newDate) && correctMonthDay(newDate, days, months) {
+	if afterNow(date, now) && correctMonthDay(newDate, days, months) {
 		return newDate.Format(Layout), nil
 	}
 
 	//Перебор дней
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10000; i++ {
 		newDate = newDate.AddDate(0, 0, 1)
-		if afterNow(now, newDate) && correctMonthDay(newDate, days, months) {
+		if afterNow(date, now) && correctMonthDay(newDate, days, months) {
 			return newDate.Format(Layout), nil
 		}
 	}
