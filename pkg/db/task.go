@@ -90,3 +90,51 @@ func UpdateTask(task *Task) error {
 	}
 	return nil
 }
+
+func DeleteTask(id string) error {
+	if DB == nil {
+		return errors.New("database not initialized")
+	}
+
+	query := `DELETE FROM scheduler WHERE id = :id`
+	res, err := DB.Exec(query, sql.Named("id", id))
+
+	if err != nil {
+		return err
+	}
+
+	// Проверяем, что задача была удалена
+	count, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected error: %w", err)
+	}
+	if count == 0 {
+		return errors.New("error in deliting task")
+	}
+
+	return nil
+}
+
+func UpdateDate(id string, date string) error {
+	if DB == nil {
+		return errors.New("database not initialized")
+	}
+
+	query := `UPDATE scheduler SET date = :date WHERE id = :id`
+	res, err := DB.Exec(query, sql.Named("date", date), sql.Named("id", id))
+
+	if err != nil {
+		return fmt.Errorf("update date failed: %w", err)
+	}
+
+	// Проверяем, что задача была удалена
+	count, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected error: %w", err)
+	}
+	if count == 0 {
+		return errors.New("error in deliting task")
+	}
+
+	return nil
+}

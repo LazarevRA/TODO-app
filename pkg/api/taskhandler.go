@@ -4,6 +4,7 @@ import (
 	"Final_project/pkg/db"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 var TaskLimit = 50
@@ -21,6 +22,9 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 		getTaskHandler(w, r)
 	case http.MethodPut:
 		updateTaskHandler(w, r)
+	case http.MethodDelete:
+		deleteTaskHandler(w, r)
+
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
@@ -87,6 +91,62 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		// return status 500
 		w.WriteHeader(http.StatusInternalServerError)
 		writeJSON(w, map[string]string{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, nil)
+}
+
+func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		writeJSONerror(w, "ID is required", http.StatusBadRequest)
+		return
+	}
+
+	task, err := db.GetTask(id)
+	if err != nil {
+		writeJSONerror(w, "Task not found", http.StatusBadRequest)
+		return
+	}
+
+	// Если нет правил повторения, удаляем таску
+	if task.Repeat == "" {
+		if err := db.DeleteTask(id); err != nil {
+			writeJSONerror(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, nil)
+		return
+	}
+
+	next, err := NextDate(time.Now().Truncate(24*time.Hour), task.Date, task.Repeat)
+
+	if err != nil {
+		writeJSONerror(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := db.UpdateDate(id, next); err != nil {
+		writeJSONerror(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	writeJSON(w, nil)
+
+}
+
+func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		writeJSONerror(w, "No task with this ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := db.DeleteTask(id); err != nil {
+		writeJSONerror(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

@@ -41,8 +41,8 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//Запись last ID
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	json.NewEncoder(w).Encode(map[string]any{"id": id})
+
+	writeJSON(w, map[string]any{"id": id})
 
 }
 
@@ -61,12 +61,12 @@ func writeJSONerror(w http.ResponseWriter, err string, status int) {
 // OK
 func checkDate(task *db.Task) error {
 
-	now := time.Now()
+	now := time.Now().UTC()
 	now = now.Truncate(24 * time.Hour)
 
 	// Если дата не указана, устанавливаем сегодняшнюю
 	if task.Date == "" {
-		task.Date = now.Format(Layout)
+		task.Date = now.UTC().Format(Layout)
 	}
 	// парсим дату
 	date, err := time.Parse(Layout, task.Date)
