@@ -1,13 +1,94 @@
 package api
 
-import "net/http"
+import (
+	"Final_project/pkg/db"
+	"encoding/json"
+	"net/http"
+)
+
+var TaskLimit = 50
+
+type TasksResp struct {
+	Tasks []*db.Task `json:"tasks"`
+}
 
 func TaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodPost:
 		addTaskHandler(w, r)
+	case http.MethodGet:
+		getTaskHandler(w, r)
+	case http.MethodPut:
+		updateTaskHandler(w, r)
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func tasksHandler(w http.ResponseWriter, r *http.Request) {
+
+	tasks, err := db.Tasks(TaskLimit)
+	if err != nil {
+		writeJSONerror(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := TasksResp{Tasks: tasks}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func getTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		writeJSONerror(w, "ID parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	task, err := db.GetTask(id)
+	if err != nil {
+		writeJSONerror(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	writeJSON(w, task)
+}
+
+func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
+
+	var task db.Task
+
+	//Декодирование
+	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+		writeJSONerror(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+	// Проверка наличия заголовка
+	if task.ID == "" {
+		writeJSONerror(w, "ID is required", http.StatusBadRequest)
+		return
+	}
+
+	// Проверка наличия заголовка
+	if task.Title == "" {
+		writeJSONerror(w, "task title required", http.StatusBadRequest)
+		return
+	}
+
+	// проверка даты
+	if err := checkDate(&task); err != nil {
+		writeJSONerror(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := db.UpdateTask(&task); err != nil {
+		// return status 500
+		w.WriteHeader(http.StatusInternalServerError)
+		writeJSON(w, map[string]string{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, nil)
 }

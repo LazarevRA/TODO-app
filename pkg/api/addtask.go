@@ -16,24 +16,20 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	//Декодирование
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
 
-		w.WriteHeader(http.StatusBadRequest)
-		writeJSON(w, "error", fmt.Sprintf("incorrect data in JSON: %s", err))
+		writeJSONerror(w, fmt.Sprintf("incorrect data in JSON: %s", err), http.StatusBadRequest)
 
 		return
 	}
 
 	//Проверка на наличие заголовка
 	if task.Title == "" {
-
-		w.WriteHeader(http.StatusBadRequest)
-		writeJSON(w, "error", "title required")
+		writeJSONerror(w, "title required", http.StatusBadRequest)
 		return
 	}
 
 	//Проверка даты
 	if err := checkDate(&task); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		writeJSON(w, "error", fmt.Sprintf("Check date error: %s", err))
+		writeJSONerror(w, fmt.Sprintf("Check date error: %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -41,20 +37,25 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := db.AddTask(&task)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		writeJSON(w, "error", fmt.Sprintf("DB add task error: + %s", err))
+		writeJSONerror(w, fmt.Sprintf("DB add task error: + %s", err), http.StatusBadRequest)
 		return
 	}
 	//Запись last ID
-
-	writeJSON(w, "id", id)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	json.NewEncoder(w).Encode(map[string]any{"id": id})
 
 }
 
 // OK
-func writeJSON(w http.ResponseWriter, key string, value any) {
+func writeJSON(w http.ResponseWriter, value any) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	json.NewEncoder(w).Encode(map[string]any{key: value})
+	json.NewEncoder(w).Encode(value)
+}
+
+func writeJSONerror(w http.ResponseWriter, err string, status int) {
+	w.WriteHeader(status)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	json.NewEncoder(w).Encode(map[string]string{"error": err})
 }
 
 // OK
