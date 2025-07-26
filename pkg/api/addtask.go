@@ -80,7 +80,7 @@ func checkDate(task *db.Task) error {
 	}
 
 	// Проверка, что дата больше чем сейчас
-	if afterNow(date) {
+	if afterNow(now, date) {
 		if task.Repeat == "" {
 			task.Date = now.Format("20060102")
 		} else {

@@ -8,15 +8,16 @@ import (
 	"time"
 )
 
-func afterNow(date time.Time) bool {
+func afterNow(now, date time.Time) bool {
 
-	return date.After(time.Now())
+	return date.After(now)
 }
 
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 	//Получаем дату
 	date, err := time.Parse(Layout, dstart)
+
 	if err != nil {
 		return "", errors.New("error in date parsing")
 	}
@@ -26,24 +27,21 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		return "", errors.New("repeat rule is empty")
 	}
 
-	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
-
 	parts := strings.Split(repeat, " ")
 
 	switch parts[0] {
 
 	case "d":
-		return nextDay(date, parts)
+		return nextDay(now, date, parts)
 
 	case "y":
-		return nextYear(date, parts)
+		return nextYear(now, date, parts)
 
 	case "w":
-		return nextWeek(date, parts)
+		return nextWeek(now, date, parts)
 
 	case "m":
-		return nextMonth(date, parts)
+		return nextMonth(now, date, parts)
 	default:
 		return "", fmt.Errorf("wrong repeat date format: %s", parts[0])
 	}

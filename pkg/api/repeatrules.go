@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func nextDay(date time.Time, parts []string) (string, error) {
+func nextDay(now, date time.Time, parts []string) (string, error) {
 	//Проверка на правильность правила
 	if len(parts) != 2 {
 		return "", errors.New("wrong rule for 'd' format")
@@ -23,33 +23,30 @@ func nextDay(date time.Time, parts []string) (string, error) {
 		return "", errors.New("selected interval must be 1-400")
 	}
 
-	nextDate := date
 	//Увеличиваем время, пока не будет больше текущего
 	for {
-		nextDate = nextDate.AddDate(0, 0, interval)
-		if afterNow(nextDate) {
-			return nextDate.Format(Layout), nil
+		date = date.AddDate(0, 0, interval)
+		if afterNow(now, date) {
+			return date.Format(Layout), nil
 		}
 	}
 }
 
-func nextYear(date time.Time, parts []string) (string, error) {
+func nextYear(now, date time.Time, parts []string) (string, error) {
 	//Проверка на правильность правила
 	if len(parts) != 1 {
 		return "", errors.New("wrong rule for 'y' format")
 	}
 
-	nextDate := date
-
 	for {
-		nextDate = nextDate.AddDate(1, 0, 0)
-		if afterNow(nextDate) {
-			return nextDate.Format(Layout), nil
+		date = date.AddDate(1, 0, 0)
+		if afterNow(now, date) {
+			return date.Format(Layout), nil
 		}
 	}
 }
 
-func nextWeek(date time.Time, parts []string) (string, error) {
+func nextWeek(now, date time.Time, parts []string) (string, error) {
 	//Проверка, что есть перечисление дней
 	if len(parts) != 2 {
 		return "", errors.New("wrong rule for 'w' format")
@@ -63,25 +60,23 @@ func nextWeek(date time.Time, parts []string) (string, error) {
 		return "", errors.New("empty week days list")
 	}
 
-	newDate := date
-
 	//Проверка удовлетворяет ли стартовая дата условию "позже чем сейчас"
-	if afterNow(newDate) && correctWeekDay(newDate, days) {
-		return newDate.Format(Layout), nil
+	if afterNow(now, date) && correctWeekDay(date, days) {
+		return date.Format(Layout), nil
 	}
 
 	//Перебор дней
 	for i := 0; i < 400; i++ {
-		newDate = newDate.AddDate(0, 0, 1)
-		if afterNow(newDate) && correctWeekDay(newDate, days) {
-			return newDate.Format(Layout), nil
+		date = date.AddDate(0, 0, 1)
+		if afterNow(now, date) && correctWeekDay(date, days) {
+			return date.Format(Layout), nil
 		}
 	}
 
 	return "", errors.New("date not found within max search period")
 }
 
-func nextMonth(date time.Time, parts []string) (string, error) {
+func nextMonth(now, date time.Time, parts []string) (string, error) {
 	if len(parts) < 2 {
 		return "", errors.New("wrong rule for 'm' format")
 	}
@@ -94,14 +89,14 @@ func nextMonth(date time.Time, parts []string) (string, error) {
 	newDate := date
 
 	//Проверка удовлетворяет ли стартовая дата условию "позже чем сейчас"
-	if afterNow(newDate) && correctMonthDay(newDate, days, months) {
+	if afterNow(now, newDate) && correctMonthDay(newDate, days, months) {
 		return newDate.Format(Layout), nil
 	}
 
 	//Перебор дней
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 1000; i++ {
 		newDate = newDate.AddDate(0, 0, 1)
-		if afterNow(newDate) && correctMonthDay(newDate, days, months) {
+		if afterNow(now, newDate) && correctMonthDay(newDate, days, months) {
 			return newDate.Format(Layout), nil
 		}
 	}
