@@ -66,7 +66,7 @@ func nextWeek(now, date time.Time, parts []string) (string, error) {
 	}
 
 	//Перебор дней
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 1500; i++ {
 		date = date.AddDate(0, 0, 1)
 		if afterNow(date, now) && correctWeekDay(date, days) {
 			return date.Format(Layout), nil
@@ -86,18 +86,18 @@ func nextMonth(now, date time.Time, parts []string) (string, error) {
 		return "", fmt.Errorf("invalid month rule: %w", err)
 	}
 
-	newDate := date
+	//newDate := date
 
 	//Проверка удовлетворяет ли стартовая дата условию "позже чем сейчас"
-	if afterNow(date, now) && correctMonthDay(newDate, days, months) {
-		return newDate.Format(Layout), nil
+	if afterNow(date, now) && correctMonthDay(date, days, months) {
+		return date.Format(Layout), nil
 	}
 
 	//Перебор дней
-	for i := 0; i < 10000; i++ {
-		newDate = newDate.AddDate(0, 0, 1)
-		if afterNow(date, now) && correctMonthDay(newDate, days, months) {
-			return newDate.Format(Layout), nil
+	for i := 0; i < 1500; i++ {
+		date = date.AddDate(0, 0, 1)
+		if afterNow(date, now) && correctMonthDay(date, days, months) {
+			return date.Format(Layout), nil
 		}
 	}
 
