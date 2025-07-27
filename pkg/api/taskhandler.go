@@ -92,13 +92,12 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := db.UpdateTask(&task); err != nil {
-		// return status 500
-		w.WriteHeader(http.StatusInternalServerError)
-		writeJSON(w, map[string]string{"error": err.Error()})
+
+		writeJSONerror(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	writeJSON(w, nil)
+	writeJSON(w, map[string]string{})
 }
 
 // Отметить задачу сделанной
@@ -122,7 +121,7 @@ func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 			writeJSONerror(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		writeJSON(w, nil)
+		writeJSON(w, map[string]string{})
 		return
 	}
 
@@ -140,10 +139,11 @@ func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, nil)
+	writeJSON(w, map[string]string{})
 
 }
 
+// Удаление задачи
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Query().Get("id")
@@ -157,5 +157,5 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, nil)
+	writeJSON(w, map[string]string{})
 }
