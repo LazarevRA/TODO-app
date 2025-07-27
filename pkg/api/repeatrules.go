@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Реализация дневного ("d") правила повторения
 func nextDay(now, date time.Time, parts []string) (string, error) {
 	//Проверка на правильность правила
 	if len(parts) != 2 {
@@ -32,6 +33,7 @@ func nextDay(now, date time.Time, parts []string) (string, error) {
 	}
 }
 
+// Реализация годового ("y") правила повторения
 func nextYear(now, date time.Time, parts []string) (string, error) {
 	//Проверка на правильность правила
 	if len(parts) != 1 {
@@ -46,6 +48,7 @@ func nextYear(now, date time.Time, parts []string) (string, error) {
 	}
 }
 
+// Реализация недельного ("w") правила повторения
 func nextWeek(now, date time.Time, parts []string) (string, error) {
 	//Проверка, что есть перечисление дней
 	if len(parts) != 2 {
@@ -76,6 +79,7 @@ func nextWeek(now, date time.Time, parts []string) (string, error) {
 	return "", errors.New("date not found within max search period")
 }
 
+// Реализация месячного ("m") правила повторения
 func nextMonth(now, date time.Time, parts []string) (string, error) {
 	if len(parts) < 2 {
 		return "", errors.New("wrong rule for 'm' format")
@@ -104,6 +108,7 @@ func nextMonth(now, date time.Time, parts []string) (string, error) {
 	return "", errors.New("date not found within max search period")
 }
 
+// Парсинг строки в диапазоне min - max для поиска целых чисел с разделителем ","
 func parseIntList(s string, min, max int) ([]int, error) {
 	parts := strings.Split(s, ",")
 	result := make([]int, 0, len(parts))
@@ -142,6 +147,7 @@ func correctWeekDay(date time.Time, days []int) bool {
 	return false
 }
 
+// Парсинг данных из правила "repeat" для разделения их на слайс дней и месяцев
 func parseMonthRule(parts []string) (days []int, months []int, err error) {
 
 	// Парсинг дней (-2..31)
@@ -161,6 +167,7 @@ func parseMonthRule(parts []string) (days []int, months []int, err error) {
 	return days, months, nil
 }
 
+// Проверка дней на соответствие правилу повторения
 func correctMonthDay(date time.Time, days, months []int) bool {
 
 	if len(months) > 0 {
@@ -180,6 +187,7 @@ func correctMonthDay(date time.Time, days, months []int) bool {
 	lastDay := time.Date(date.Year(), date.Month()+1, 0, 0, 0, 0, 0, time.UTC).Day()
 	currentDay := date.Day()
 
+	//	Отработка последнего и предпоследнего дня
 	for _, d := range days {
 		switch {
 		case d > 0 && currentDay == d:

@@ -16,22 +16,6 @@ func afterNow(date, now time.Time) bool {
 
 }
 
-// ok
-/*
-func afterNow(date, now time.Time) bool {
-	dy, dm, dd := date.Date()
-	ny, nm, nd := now.Date()
-
-	if dy != ny {
-		return dy > ny
-	}
-	if dm != nm {
-		return dm > nm
-	}
-	return dd > nd
-}*/
-
-// OK
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 	//Получаем дату
@@ -78,7 +62,7 @@ func nextDateHandler(w http.ResponseWriter, r *http.Request) {
 
 	if nowStr == "" {
 
-		now = time.Now().Truncate(24 * time.Hour)
+		now = time.Now().UTC().Truncate(24 * time.Hour)
 
 	} else {
 		var err error

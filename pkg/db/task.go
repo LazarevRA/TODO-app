@@ -14,7 +14,7 @@ type Task struct {
 	Repeat  string `json:"repeat"`
 }
 
-// ok
+// Реализация запроса к таблице для добавления задачи
 func AddTask(task *Task) (int64, error) {
 
 	if DB == nil {
@@ -39,6 +39,7 @@ func AddTask(task *Task) (int64, error) {
 	return res.LastInsertId()
 }
 
+// Реализация запроса к таблице для получения задачи
 func GetTask(id string) (*Task, error) {
 
 	if DB == nil {
@@ -63,6 +64,7 @@ func GetTask(id string) (*Task, error) {
 	return &task, nil
 }
 
+// Реализация запроса к таблице для изменения задачи
 func UpdateTask(task *Task) error {
 
 	if DB == nil {
@@ -91,6 +93,7 @@ func UpdateTask(task *Task) error {
 	return nil
 }
 
+// Реализация запроса к таблице для удаления задачи
 func DeleteTask(id string) error {
 	if DB == nil {
 		return errors.New("database not initialized")
@@ -115,6 +118,7 @@ func DeleteTask(id string) error {
 	return nil
 }
 
+// Реализация запроса к таблице для обновления даты
 func UpdateDate(id string, date string) error {
 	if DB == nil {
 		return errors.New("database not initialized")

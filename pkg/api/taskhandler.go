@@ -13,6 +13,7 @@ type TasksResp struct {
 	Tasks []*db.Task `json:"tasks"`
 }
 
+// Общий хэнделр для единичной задачи, разбивающий по методу обращения
 func TaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
@@ -30,6 +31,7 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Хэндлер для списка задач
 func tasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	tasks, err := db.Tasks(TaskLimit)
@@ -43,6 +45,7 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// Получение задачи
 func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Query().Get("id")
@@ -60,6 +63,7 @@ func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, task)
 }
 
+// Изменение задачи
 func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	var task db.Task
@@ -97,6 +101,7 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, nil)
 }
 
+// Отметить задачу сделанной
 func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Query().Get("id")
@@ -121,7 +126,9 @@ func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	next, err := NextDate(time.Now().Truncate(24*time.Hour), task.Date, task.Repeat)
+	now := time.Now().UTC().Truncate(24 * time.Hour)
+
+	next, err := NextDate(now, task.Date, task.Repeat)
 
 	if err != nil {
 		writeJSONerror(w, err.Error(), http.StatusInternalServerError)
